@@ -517,7 +517,7 @@ CREATE TABLE `awardoffer` (
   KEY `awardoffer_idx_awardcycle_id` (`awardcycle_id`),
   KEY `awardoffer_idx_nominationtype_id` (`nominationtype_id`),
   KEY `awardoffer_idx_awardprofile_id` (`awardprofile_id`),
-  KEY `ao_for_nao_ao_exists_and_same_nomtype_and_ac` (`awardcycle_id`,`nominationtype_id`,`awardprofile_id`),
+  KEY `ao_for_nao_ao_exists_and_same_nomtype__ac` (`awardcycle_id`,`nominationtype_id`,`awardprofile_id`),
   
   CONSTRAINT `awardoffer_fk_awardcycle_id`
     FOREIGN KEY (`awardcycle_id`)
@@ -815,7 +815,9 @@ CREATE TABLE `milestonetype` (
   
   PRIMARY KEY `milestonetype_unique_slug` (`slug`),
 
-  UNIQUE KEY `milestonetype_serial` (`id`)
+  UNIQUE KEY `milestonetype_serial` (`id`),
+  UNIQUE KEY `milestonetype_unique_name` (`name`),
+  UNIQUE KEY `milestonetype_unique_order` (`order`)
 
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -868,54 +870,154 @@ DELIMITER ;
 CREATE TRIGGER `milestonetype_nominationtype_on_update` BEFORE UPDATE ON `milestonetype_nominationtype`
     FOR EACH ROW SET NEW.last_modified = NOW();
 
+#milestone
 CREATE TABLE `milestone` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `milestonetype_slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `nominationtype_id` int(11) unsigned NOT NULL,
-  `awardcycle_id` int(11) unsigned NOT NULL,
   `date` date NOT NULL,
   `created` datetime DEFAULT NULL,
   `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT 1,
 
-  PRIMARY KEY `milestone_mstype_once_per_nomtype_per_cycle` (`milestonetype_slug`, `nominationtype_id`, `awardcycle_id`),
-  
-  UNIQUE KEY `milestone_serial` (`id`),  
-  KEY `milestone_idx_nominationtype_id` (`nominationtype_id`),
-  KEY `milestone_idx_milestonetype_id` (`milestonetype_slug`),
-  KEY `milestone_idx_awardcycle_id` (`awardcycle_id`),
+  PRIMARY KEY (`id`)  
 
-  CONSTRAINT `milestone_fk_awardcycle_id`
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `milestone_on_insert` BEFORE INSERT ON `milestone`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `milestone_on_update` BEFORE UPDATE ON `milestone`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#milestone_awardcycle
+CREATE TABLE `milestone_awardcycle` (
+
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `awardcycle_id` int(11) unsigned NOT NULL,
+  `nominationtype_id` int(11) unsigned NOT NULL,
+  `milestonetype_slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `milestone_id` int(11) unsigned NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+  
+  PRIMARY KEY `msac_unique_pk` (`awardcycle_id`, `nominationtype_id`, `milestonetype_slug`),
+
+  UNIQUE KEY `msac_serial` (`id`),
+
+  KEY `msac_idx_awardcycle_id` (`awardcycle_id`),
+  KEY `msac_idx_nominationtype_id` (`nominationtype_id`),
+  KEY `msac_idx_milestonetype_slug` (`milestonetype_slug`),
+  KEY `msac_idx_milestone_id` (`milestone_id`),
+  
+  CONSTRAINT `msac_fk_awardcycle_id`
     FOREIGN KEY (`awardcycle_id`)
     REFERENCES `awardcycle` (`id`),
-  
-  CONSTRAINT `milestone_fk_milestonetype_slug`
-    FOREIGN KEY (`milestonetype_slug`)
-    REFERENCES `milestonetype` (`slug`),
-  
-  CONSTRAINT `milestone_fk_nominationtype_id`
+
+  CONSTRAINT `msac_fk_nominationtype_id`
     FOREIGN KEY (`nominationtype_id`)
     REFERENCES `nominationtype` (`id`),
 
-  CONSTRAINT `ms_unique_mstnt_pair_exists`
-    FOREIGN KEY (
-      `milestonetype_slug`,
-      `nominationtype_id`
-    ) REFERENCES `milestonetype_nominationtype` (
-      `milestonetype_slug`,
-      `nominationtype_id`
-    ),
+  CONSTRAINT `msac_fk_milestonetype_slug`
+    FOREIGN KEY (`milestonetype_slug`)
+    REFERENCES `milestonetype` (`slug`),
 
-  CONSTRAINT `ms_unique_acnt_pair_exists`
-    FOREIGN KEY (
-      `awardcycle_id`,
-      `nominationtype_id`
-    ) REFERENCES `awardcycle_nominationtype` (
-      `awardcycle_id`,
-      `nominationtype_id`
-    )
+  CONSTRAINT `msac_fk_milestone_id`
+    FOREIGN KEY (`milestone_id`)
+    REFERENCES `milestone` (`id`),
+
+  CONSTRAINT `msac_fk_acnt_pair`
+    FOREIGN KEY (`awardcycle_id`,`nominationtype_id`)
+    REFERENCES `awardcycle_nominationtype` (`awardcycle_id`,`nominationtype_id`),
+
+  CONSTRAINT `msac_fk_mstnt_pair`
+    FOREIGN KEY (`milestonetype_slug`,`nominationtype_id`)
+    REFERENCES `milestonetype_nominationtype` (`milestonetype_slug`,`nominationtype_id`)
 
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `milestone_awardcycle_on_insert` BEFORE INSERT ON `milestone_awardcycle`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `milestone_awardcycle_on_update` BEFORE UPDATE ON `milestone_awardcycle`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#milestone_awardoffer
+CREATE TABLE `milestone_awardoffer` (
+
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `awardcycle_id` int(11) unsigned NOT NULL,
+  `nominationtype_id` int(11) unsigned NOT NULL,
+  `awardprofile_id` int(11) unsigned NOT NULL,
+  `milestonetype_slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `milestone_id` int(11) unsigned NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+  
+  PRIMARY KEY `msao_unique_pk` (`awardcycle_id`, `nominationtype_id`, `awardprofile_id`, `milestonetype_slug`),
+
+  UNIQUE KEY `msao_serial` (`id`),
+
+  KEY `msao_idx_awardcycle_id` (`awardcycle_id`),
+  KEY `msao_idx_nominationtype_id` (`nominationtype_id`),
+  KEY `msao_idx_awardprofile_id` (`awardprofile_id`),
+  KEY `msao_idx_milestonetype_slug` (`milestonetype_slug`),
+  KEY `msao_idx_milestone_id` (`milestone_id`),
+  
+  CONSTRAINT `msao_fk_awardcycle_id`
+    FOREIGN KEY (`awardcycle_id`)
+    REFERENCES `awardcycle` (`id`),
+
+  CONSTRAINT `msao_fk_nominationtype_id`
+    FOREIGN KEY (`nominationtype_id`)
+    REFERENCES `nominationtype` (`id`),
+
+  CONSTRAINT `msao_fk_awardprofile_id`
+    FOREIGN KEY (`awardprofile_id`)
+    REFERENCES `awardprofile` (`id`),
+
+  CONSTRAINT `msao_fk_milestonetype_slug`
+    FOREIGN KEY (`milestonetype_slug`)
+    REFERENCES `milestonetype` (`slug`),
+
+  CONSTRAINT `msao_fk_milestone_id`
+    FOREIGN KEY (`milestone_id`)
+    REFERENCES `milestone` (`id`),
+
+  CONSTRAINT `msao_fk_ao`
+    FOREIGN KEY (`awardcycle_id`,`nominationtype_id`, `awardprofile_id`)
+    REFERENCES `awardoffer` (`awardcycle_id`,`nominationtype_id`, `awardprofile_id`),
+
+  CONSTRAINT `msao_fk_acnt_pair`
+    FOREIGN KEY (`awardcycle_id`,`nominationtype_id`)
+    REFERENCES `awardcycle_nominationtype` (`awardcycle_id`,`nominationtype_id`),
+
+  CONSTRAINT `msao_fk_mstnt_pair`
+    FOREIGN KEY (`milestonetype_slug`,`nominationtype_id`)
+    REFERENCES `milestonetype_nominationtype` (`milestonetype_slug`,`nominationtype_id`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `milestone_awardoffer_on_insert` BEFORE INSERT ON `milestone_awardoffer`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `milestone_awardoffer_on_update` BEFORE UPDATE ON `milestone_awardoffer`
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #role
 CREATE TABLE `role` (

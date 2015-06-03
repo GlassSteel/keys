@@ -8,19 +8,26 @@ emailrecipienttype i.e. to,cc,bcc - OK
 emailrecipient - OK
 emailsendattempt - OK
 
+department_user pivot?
+
 includedemailrecipient plus pivots to dept, awardprofile
 various email to object pivots?
 
 kochtravelaward
-role
-capability
-role_capability
-user_role
-awardoffer_milestone
+
+role - OK
+capability - OK
+role_capability - OK
+user_role - OK
+
+milestone_awardcycle - NEEDS RUN
+milestone_awardoffer - NEEDS RUN
+
 payoutsegment
 payout
 award
 releaseoption
 releaseoption_award
+
 something to replace award_notification sprinkles
 
