@@ -917,4 +917,136 @@ CREATE TABLE `milestone` (
 
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+#role
+CREATE TABLE `role` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `description` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+  
+  PRIMARY KEY `role_unique_slug` (`slug`),
+
+  UNIQUE KEY `role_serial` (`id`),
+  UNIQUE KEY `role_name` (`name`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `role_on_insert` BEFORE INSERT ON `role`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `role_on_update` BEFORE UPDATE ON `role`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#capability
+CREATE TABLE `capability` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `description` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+  
+  PRIMARY KEY `capability_unique_slug` (`slug`),
+
+  UNIQUE KEY `capability_serial` (`id`),
+  UNIQUE KEY `capability_name` (`name`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `capability_on_insert` BEFORE INSERT ON `capability`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `capability_on_update` BEFORE UPDATE ON `capability`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#role_capability
+CREATE TABLE `role_capability` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `role_slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `capability_slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+  
+  PRIMARY KEY `rolcap_unique_rolcap_pair` (`role_slug`,`capability_slug`),
+  
+  UNIQUE KEY `rolcap_serial` (`id`),
+  KEY `rolcap_idx_role_slug` (`role_slug`),
+  KEY `rolcap_idx_capability_slug` (`capability_slug`),
+  
+  CONSTRAINT `rolcap_fk_role_slug`
+    FOREIGN KEY (`role_slug`)
+    REFERENCES `role` (`slug`),
+  
+  CONSTRAINT `rolcap_fk_capability_slug`
+    FOREIGN KEY (`capability_slug`)
+    REFERENCES `capability` (`slug`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `role_capability_on_insert` BEFORE INSERT ON `role_capability`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `role_capability_on_update` BEFORE UPDATE ON `role_capability`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#user_role
+CREATE TABLE `user_role` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL,
+  `role_id` int(11) unsigned NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+  
+  PRIMARY KEY `user_role_unique_user_role_pair` (`user_id`,`role_id`),
+  
+  UNIQUE KEY `user_role_serial` (`id`),
+  KEY `user_role_idx_user_id` (`user_id`),
+  KEY `user_role_idx_role_id` (`role_id`),
+  
+  CONSTRAINT `user_role_fk_user_id`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `user` (`id`),
+  
+  CONSTRAINT `user_role_fk_role_id`
+    FOREIGN KEY (`role_id`)
+    REFERENCES `role` (`id`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `user_role_on_insert` BEFORE INSERT ON `user_role`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `user_role_on_update` BEFORE UPDATE ON `user_role`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
 SHOW ENGINE INNODB STATUS;

@@ -2,11 +2,11 @@
 
 TODO:
 
-email - DONE
-emailtype i.e. notification,rejection,frr - DONE
-emailrecipienttype i.e. to,cc,bcc - DONE
-emailrecipient - DONE
-emailsendattempt - DONE
+email - OK
+emailtype i.e. notification,rejection,frr - OK
+emailrecipienttype i.e. to,cc,bcc - OK
+emailrecipient - OK
+emailsendattempt - OK
 
 includedemailrecipient plus pivots to dept, awardprofile
 various email to object pivots?
