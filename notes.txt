@@ -1,0 +1,26 @@
+#added declined reason to awards?
+
+TODO:
+
+email - DONE
+emailtype i.e. notification,rejection,frr - DONE
+emailrecipienttype i.e. to,cc,bcc - DONE
+emailrecipient - DONE
+emailsendattempt - DONE
+
+includedemailrecipient plus pivots to dept, awardprofile
+various email to object pivots?
+
+kochtravelaward
+role
+capability
+role_capability
+user_role
+awardoffer_milestone
+payoutsegment
+payout
+award
+releaseoption
+releaseoption_award
+something to replace award_notification sprinkles
+

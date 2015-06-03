@@ -1,30 +1,109 @@
-#added declined reason to awards?
+DROP PROCEDURE IF EXISTS `drop_all_tables`;
 
-TODO:
+DELIMITER $$
+CREATE PROCEDURE `drop_all_tables`()
+BEGIN
+    DECLARE _done INT DEFAULT FALSE;
+    DECLARE _tableName VARCHAR(255);
+    DECLARE _cursor CURSOR FOR
+        SELECT table_name 
+        FROM information_schema.TABLES
+        WHERE table_schema = SCHEMA();
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET _done = TRUE;
 
-email - DONE
-emailtype i.e. notification,rejection,frr - DONE
-emailrecipienttype i.e. to,cc,bcc - DONE
-emailrecipient - DONE
-emailsendattempt - DONE
+    SET FOREIGN_KEY_CHECKS = 0;
 
-includedemailrecipient plus pivots to dept, awardprofile
-various email to object pivots
+    OPEN _cursor;
 
-kochtravelaward
-role
-capability
-role_capability
-user_role
-awardoffer_milestone
-payoutsegment
-payout
-award
-releaseoption
-releaseoption_award
-something to replace award_notification sprinkles
+    REPEAT FETCH _cursor INTO _tableName;
 
+    IF NOT _done THEN
+        SET @stmt_sql = CONCAT('DROP TABLE ', _tableName);
+        PREPARE stmt1 FROM @stmt_sql;
+        EXECUTE stmt1;
+        DEALLOCATE PREPARE stmt1;
+    END IF;
+
+    UNTIL _done END REPEAT;
+
+    CLOSE _cursor;
+    SET FOREIGN_KEY_CHECKS = 1;
+END$$
+
+DELIMITER ;
+
+call drop_all_tables(); 
+
+DROP PROCEDURE IF EXISTS `drop_all_tables`;
+
+#department
+CREATE TABLE `department` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `abbr` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `department_unique_name` (`name`),
+  UNIQUE KEY `department_unique_abbr` (`abbr`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `department_on_insert` BEFORE INSERT ON `department`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `department_on_update` BEFORE UPDATE ON `department`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#user
+CREATE TABLE `user` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `onyen` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `unc_pid` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+  `first_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `last_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `department_id` int(10) unsigned DEFAULT NULL,
+  
+  PRIMARY KEY (`id`),
+  
+  UNIQUE KEY `user_unique_email` (`email`),
+  UNIQUE KEY `user_unique_onyen` (`onyen`),
+  UNIQUE KEY `user_unique_unc_pid` (`unc_pid`),
+  KEY `user_idx_department_id` (`department_id`),
+  
+  CONSTRAINT `user_fk_department_id`
+    FOREIGN KEY (`department_id`)
+    REFERENCES `department` (`id`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `user_on_insert` BEFORE INSERT ON `user`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `user_on_update` BEFORE UPDATE ON `user`
+    FOR EACH ROW SET NEW.last_modified = NOW();
 #emailtype
+
 CREATE TABLE `emailtype` (
   
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -80,7 +159,7 @@ CREATE TRIGGER `emailrecipienttype_on_update` BEFORE UPDATE ON `emailrecipientty
 CREATE TABLE `email` (
   
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `emailtype_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `emailtype_id` int(11) unsigned NOT NULL,
   `subject` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `body` mediumtext COLLATE utf8_unicode_ci,
   `created` datetime DEFAULT NULL,
@@ -93,7 +172,7 @@ CREATE TABLE `email` (
   
   CONSTRAINT `email_fk_emailtype_id`
     FOREIGN KEY (`emailtype_id`)
-    REFERENCES `emailtype` (`id`),
+    REFERENCES `emailtype` (`id`)
 
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -124,7 +203,7 @@ CREATE TABLE `emailrecipient` (
   KEY `emailrecipient_idx_email_id` (`email_id`),
   KEY `emailrecipient_idx_emailrecipienttype_id` (`emailrecipienttype_id`),
   KEY `emailrecipient_idx_user_email` (`user_email`),
-  UNIQUE KEY 'emailrecipient_unique_recipient_once_per_email' (`email_id`,`user_email`),
+  UNIQUE KEY `emailrecipient_unique_recipient_once_per_email` (`email_id`,`user_email`),
   
   CONSTRAINT `emailrecipient_fk_email_id`
     FOREIGN KEY (`email_id`)
@@ -206,73 +285,6 @@ CREATE TRIGGER `upload_on_insert` BEFORE INSERT ON `upload`
 DELIMITER ;
 
 CREATE TRIGGER `upload_on_update` BEFORE UPDATE ON `upload`
-    FOR EACH ROW SET NEW.last_modified = NOW();
-
-#department
-CREATE TABLE `department` (
-  
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `abbr` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `created` datetime DEFAULT NULL,
-  `last_modified` datetime DEFAULT NULL,
-  `active` tinyint(1) DEFAULT '1',
-
-  PRIMARY KEY (`id`),
-
-  UNIQUE KEY `department_unique_name` (`name`),
-  UNIQUE KEY `department_unique_abbr` (`abbr`)
-
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-DELIMITER //
-CREATE TRIGGER `department_on_insert` BEFORE INSERT ON `department`
-    FOR EACH ROW BEGIN
-      SET NEW.created = IFNULL(NEW.created, NOW());
-      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
-    END//
-DELIMITER ;
-
-CREATE TRIGGER `department_on_update` BEFORE UPDATE ON `department`
-    FOR EACH ROW SET NEW.last_modified = NOW();
-
-#user
-CREATE TABLE `user` (
-  
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `onyen` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `unc_pid` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `created` datetime DEFAULT NULL,
-  `last_modified` datetime DEFAULT NULL,
-  `active` tinyint(1) DEFAULT '1',
-  `first_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `last_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `department_id` int(10) unsigned DEFAULT NULL,
-  
-  PRIMARY KEY (`id`),
-  
-  UNIQUE KEY `user_unique_email` (`email`),
-  UNIQUE KEY `user_unique_onyen` (`onyen`),
-  UNIQUE KEY `user_unique_unc_pid` (`unc_pid`),
-  KEY `user_idx_department_id` (`department_id`),
-  
-  CONSTRAINT `user_fk_department_id`
-    FOREIGN KEY (`department_id`)
-    REFERENCES `department` (`id`)
-
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-DELIMITER //
-CREATE TRIGGER `user_on_insert` BEFORE INSERT ON `user`
-    FOR EACH ROW BEGIN
-      SET NEW.created = IFNULL(NEW.created, NOW());
-      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
-    END//
-DELIMITER ;
-
-CREATE TRIGGER `user_on_update` BEFORE UPDATE ON `user`
     FOR EACH ROW SET NEW.last_modified = NOW();
 
 #hispaniclatino
@@ -904,3 +916,5 @@ CREATE TABLE `milestone` (
     )
 
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+SHOW ENGINE INNODB STATUS;
