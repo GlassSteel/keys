@@ -1,13 +1,47 @@
 #added declined reason to awards?
 
+TODO:
+email
+emailsendattempt
+deptemailrecipients
+awardprofileemailrecipients
+kochtravelaward
+role
+capability
+
+#upload
+CREATE TABLE `upload` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `file_name` varchar(255) NOT NULL,
+  `file_type` varchar(255) NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `file_content` mediumblob NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `upload_on_insert` BEFORE INSERT ON `upload`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `upload_on_update` BEFORE UPDATE ON `upload`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
 #department
 CREATE TABLE `department` (
   
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `abbr` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
 
   PRIMARY KEY (`id`),
@@ -20,13 +54,13 @@ CREATE TABLE `department` (
 DELIMITER //
 CREATE TRIGGER `department_on_insert` BEFORE INSERT ON `department`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `department_on_update` BEFORE UPDATE ON `department`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #user
 CREATE TABLE `user` (
@@ -35,8 +69,8 @@ CREATE TABLE `user` (
   `onyen` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `unc_pid` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
   `first_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `last_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -59,21 +93,21 @@ CREATE TABLE `user` (
 DELIMITER //
 CREATE TRIGGER `user_on_insert` BEFORE INSERT ON `user`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `user_on_update` BEFORE UPDATE ON `user`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #hispaniclatino
 CREATE TABLE `hispaniclatino` (
   
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `option` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
 
   PRIMARY KEY (`id`),
@@ -85,21 +119,21 @@ CREATE TABLE `hispaniclatino` (
 DELIMITER //
 CREATE TRIGGER `hispaniclatino_on_insert` BEFORE INSERT ON `hispaniclatino`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `hispaniclatino_on_update` BEFORE UPDATE ON `hispaniclatino`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #raceselfid
 CREATE TABLE `raceselfid` (
   
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `option` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
 
   PRIMARY KEY (`id`),
@@ -111,14 +145,39 @@ CREATE TABLE `raceselfid` (
 DELIMITER //
 CREATE TRIGGER `raceselfid_on_insert` BEFORE INSERT ON `raceselfid`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `raceselfid_on_update` BEFORE UPDATE ON `raceselfid`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
+#frracceptdecline
+CREATE TABLE `frracceptdecline` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `option` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `frracceptdecline_unique_option` (`option`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `frracceptdecline_on_insert` BEFORE INSERT ON `frracceptdecline`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `frracceptdecline_on_update` BEFORE UPDATE ON `frracceptdecline`
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #awardcycle
 CREATE TABLE `awardcycle` (
@@ -128,8 +187,8 @@ CREATE TABLE `awardcycle` (
   `description` text COLLATE utf8_unicode_ci,
   `begin_date` datetime NOT NULL,
   `end_date` datetime NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
   
   PRIMARY KEY (`id`),
@@ -141,13 +200,13 @@ CREATE TABLE `awardcycle` (
 DELIMITER //
 CREATE TRIGGER `awardcycle_on_insert` BEFORE INSERT ON `awardcycle`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `awardcycle_on_update` BEFORE UPDATE ON `awardcycle`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #nominationtype
 CREATE TABLE `nominationtype` (
@@ -158,9 +217,9 @@ CREATE TABLE `nominationtype` (
   `item_label` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `item_label_plural` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `max_offers_per_nomination` int(11) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `active` tinyint DEFAULT 1,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `nomtype_unique_name` (`name`),
@@ -171,13 +230,13 @@ CREATE TABLE `nominationtype` (
 DELIMITER //
 CREATE TRIGGER `nominationtype_on_insert` BEFORE INSERT ON `nominationtype`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `nominationtype_on_update` BEFORE UPDATE ON `nominationtype`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #awardcycle_nominationtype
 CREATE TABLE `awardcycle_nominationtype` (
@@ -185,8 +244,8 @@ CREATE TABLE `awardcycle_nominationtype` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `awardcycle_id` int(11) unsigned NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
   
   PRIMARY KEY (`awardcycle_id`,`nominationtype_id`),
@@ -208,13 +267,13 @@ CREATE TABLE `awardcycle_nominationtype` (
 DELIMITER //
 CREATE TRIGGER `awardcycle_nominationtype_on_insert` BEFORE INSERT ON `awardcycle_nominationtype`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `awardcycle_nominationtype_on_update` BEFORE UPDATE ON `awardcycle_nominationtype`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #awardprofile
 CREATE TABLE `awardprofile` (
@@ -225,14 +284,16 @@ CREATE TABLE `awardprofile` (
   `description` text COLLATE utf8_unicode_ci NOT NULL,
   `criteria_requirements` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `designation_number` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `has_custom_notification_email` tinyint(1) DEFAULT 0,
+  `profile_class_table` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `about_donors` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `about_scholarship` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `thankyou_addressee` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `donor_contact_info` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `osa_criteria` text COLLATE utf8_unicode_ci DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `active` tinyint DEFAULT 1,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
 
   PRIMARY KEY (`id`),
 
@@ -245,13 +306,13 @@ CREATE TABLE `awardprofile` (
 DELIMITER //
 CREATE TRIGGER `awardprofile_on_insert` BEFORE INSERT ON `awardprofile`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `awardprofile_on_update` BEFORE UPDATE ON `awardprofile`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #awardoffer
 CREATE TABLE `awardoffer` (
@@ -260,9 +321,9 @@ CREATE TABLE `awardoffer` (
   `awardcycle_id` int(11) unsigned NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
   `awardprofile_id` int(11) unsigned NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `active` tinyint DEFAULT 1,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
   
   PRIMARY KEY (`awardcycle_id`,`awardprofile_id`),
   
@@ -293,13 +354,13 @@ CREATE TABLE `awardoffer` (
 DELIMITER //
 CREATE TRIGGER `awardoffer_on_insert` BEFORE INSERT ON `awardoffer`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `awardoffer_on_update` BEFORE UPDATE ON `awardoffer`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #nomination
 CREATE TABLE `nomination` (
@@ -310,9 +371,9 @@ CREATE TABLE `nomination` (
   `nominationtype_id` int(11) unsigned NOT NULL,
   `nom_class_table` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `nominator_id` int(11) unsigned NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `active` tinyint DEFAULT 1,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
 
   PRIMARY KEY (`nominee_id`,`awardcycle_id`,`nom_class_table`),
   
@@ -322,6 +383,7 @@ CREATE TABLE `nomination` (
   KEY `nomination_idx_awardcycle_id` (`awardcycle_id`),
   KEY `nomination_idx_nom_class_table` (`nom_class_table`),
   KEY `nomination_idx_nominationtype_id` (`nominationtype_id`),
+  KEY `nom_for_nao_nom_exists_and_same_nomtype_and_cycle` (`nominee_id`,`awardcycle_id`,`nominationtype_id`),
   
   CONSTRAINT `nomination_fk_awardcycle_id`
     FOREIGN KEY (`awardcycle_id`)
@@ -348,30 +410,42 @@ CREATE TABLE `nomination` (
 DELIMITER //
 CREATE TRIGGER `nomination_on_insert` BEFORE INSERT ON `nomination`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `nomination_on_update` BEFORE UPDATE ON `nomination`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #selfnom
 CREATE TABLE `selfnom` (
 
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `nomination_id` int(11) unsigned NOT NULL,
-  `department_id` int(11) unsigned NOT NULL,
-  `degree_program` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `undergrad_institution` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `undergrad_gpa` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  
+  `department_id` int(11) unsigned DEFAULT NULL,
+  `degree_program` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `undergrad_institution` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `undergrad_gpa` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `graduate_institution` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `hispaniclatino_id` int(11) unsigned DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `active` tinyint DEFAULT 1,
+  
+  `personal_statement` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `cv` int(11) unsigned DEFAULT NULL,
+  
+  `frr_requestee_id` int(11) unsigned DEFAULT NULL,
+  `frr_email_sent` tinyint(1) DEFAULT 0,
+  `frracceptdecline` int(11) unsigned DEFAULT NULL,
+  `frr_recommendation_text` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `frr_text_created` datetime DEFAULT NULL,
+  `frr_text_last_modified` datetime DEFAULT NULL,
 
-   #TODO add pivot table for race identity options
+  `reject_email_sent` tinyint(1) DEFAULT 0,
+
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
 
   PRIMARY KEY (`nomination_id`),
 
@@ -385,6 +459,18 @@ CREATE TABLE `selfnom` (
     FOREIGN KEY (`department_id`)
     REFERENCES `department` (`id`),
 
+  CONSTRAINT `selfnom_fk_cv_upload_id`
+    FOREIGN KEY (`cv`)
+    REFERENCES `upload` (`id`),
+
+  CONSTRAINT `selfnom_fk_frr_user_id`
+    FOREIGN KEY (`frr_requestee_id`)
+    REFERENCES `user` (`id`),
+
+  CONSTRAINT `selfnom_fk_frr_acceptdecline`
+    FOREIGN KEY (`frracceptdecline`)
+    REFERENCES `frracceptdecline` (`id`),
+
   CONSTRAINT `selfnom_fk_hispaniclatino_id`
     FOREIGN KEY (`hispaniclatino_id`)
     REFERENCES `hispaniclatino` (`id`)
@@ -397,8 +483,8 @@ CREATE TABLE `selfnom_raceselfid` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `selfnom_id` int(11) unsigned NOT NULL,
   `raceselfid_id` int(11) unsigned NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
   
   PRIMARY KEY (`selfnom_id`,`raceselfid_id`),
@@ -420,72 +506,62 @@ CREATE TABLE `selfnom_raceselfid` (
 DELIMITER //
 CREATE TRIGGER `selfnom_raceselfid_on_insert` BEFORE INSERT ON `selfnom_raceselfid`
     FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
     END//
 DELIMITER ;
 
 CREATE TRIGGER `selfnom_raceselfid_on_update` BEFORE UPDATE ON `selfnom_raceselfid`
-    FOR EACH ROW SET NEW.updated_at = NOW();
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#nomination_awardoffer
 CREATE TABLE `nomination_awardoffer` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
-  `nomination_id` int(11) unsigned NOT NULL, #Redundant, for RedBean use
-  `awardoffer_id` int(11) unsigned NOT NULL, #Redundant, for RedBean use
-
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `nomination_id` int(11) unsigned NOT NULL,
+  `awardoffer_id` int(11) unsigned NOT NULL,
   `nominee_id` int(11) unsigned NOT NULL,
   `awardcycle_id` int(11) unsigned NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
   `awardprofile_id` int(11) unsigned NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
   
-  CONSTRAINT `nao_serial` PRIMARY KEY (`id`),
+  PRIMARY KEY (`nominee_id`,`awardcycle_id`,`awardprofile_id`),
 
-  #Use this as composite primary key.
-  UNIQUE KEY `nao_one_profile_per_nominee_per_cycle` (
-    `nominee_id`,
-    `awardcycle_id`,
-    `awardprofile_id`
-  ),
-
-  KEY `nao_nominee` (`nominee_id`),
-  KEY `nao_awardcycle` (`awardcycle_id`),
-  KEY `nao_nominationtype` (`nominationtype_id`),
-  KEY `nao_awardprofile` (`awardprofile_id`),
+  UNIQUE KEY `nao_serial` (`id`),
+  KEY `nao_idx_awardcycle_id` (`awardcycle_id`),
+  KEY `nao_idx_awardoffer_id` (`awardoffer_id`),
+  KEY `nao_idx_awardprofile_id` (`awardprofile_id`),
+  KEY `nao_idx_nomination_id` (`nomination_id`),
+  KEY `nao_idx_nominationtype_id` (`nominationtype_id`),
+  KEY `nao_idx_nominee_id` (`nominee_id`),
   
-  CONSTRAINT `nao_awardcycle_exists`
-    FOREIGN KEY (`awardcycle_id`) REFERENCES `awardcycle` (`id`),
-  CONSTRAINT `nao_awardprofile_exists`
-    FOREIGN KEY (`awardprofile_id`) REFERENCES `awardprofile` (`id`),
-  CONSTRAINT `nao_nominationtype_exists`
-    FOREIGN KEY (`nominationtype_id`) REFERENCES `nominationtype` (`id`),
-  CONSTRAINT `nao_nominee_exists`
-    FOREIGN KEY (`nominee_id`) REFERENCES `user` (`id`),
-  CONSTRAINT `nao_nomination_exists`
-    FOREIGN KEY (`nomination_id`) REFERENCES `nomination` (`id`),
-  CONSTRAINT `nao_awardoffer_exists`
-    FOREIGN KEY (`awardoffer_id`) REFERENCES `awardoffer` (`id`),
+  CONSTRAINT `nao_fk_awardcycle_id`
+    FOREIGN KEY (`awardcycle_id`)
+    REFERENCES `awardcycle` (`id`),
+  
+  CONSTRAINT `nao_fk_awardprofile_id`
+    FOREIGN KEY (`awardprofile_id`)
+    REFERENCES `awardprofile` (`id`),
+  
+  CONSTRAINT `nao_fk_nominationtype_id`
+    FOREIGN KEY (`nominationtype_id`)
+    REFERENCES `nominationtype` (`id`),
+  
+  CONSTRAINT `nao_fk_nominee_id`
+    FOREIGN KEY (`nominee_id`)
+    REFERENCES `user` (`id`),
+  
+  CONSTRAINT `nao_fk_nomination_id`
+    FOREIGN KEY (`nomination_id`)
+    REFERENCES `nomination` (`id`),
+  
+  CONSTRAINT `nao_fk_awardoffer_id`
+    FOREIGN KEY (`awardoffer_id`)
+    REFERENCES `awardoffer` (`id`),
+
 
   CONSTRAINT `nao_unique_acnt_pair_exists`
     FOREIGN KEY (
@@ -519,72 +595,112 @@ CREATE TABLE `nomination_awardoffer` (
     )
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DELIMITER //
+CREATE TRIGGER `nomination_awardoffer_on_insert` BEFORE INSERT ON `nomination_awardoffer`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
 
+CREATE TRIGGER `nomination_awardoffer_on_update` BEFORE UPDATE ON `nomination_awardoffer`
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
-DROP TABLE IF EXISTS `milestonetype`;
+#milestonetype
 CREATE TABLE `milestonetype` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
-  `slug` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `order` int(11) DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
   
-  CONSTRAINT `milestonetype_serial` PRIMARY KEY (`id`),
+  PRIMARY KEY `milestonetype_unique_slug` (`slug`),
 
-  #Use this as primary key.
-  UNIQUE KEY `milestonetype_unique_slug` (`slug`)
+  UNIQUE KEY `milestonetype_serial` (`id`)
 
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-DROP TABLE IF EXISTS `milestonetype_nominationtype`;
+DELIMITER //
+CREATE TRIGGER `milestonetype_on_insert` BEFORE INSERT ON `milestonetype`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `milestonetype_on_update` BEFORE UPDATE ON `milestonetype`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#milestonetype_nominationtype
 CREATE TABLE `milestonetype_nominationtype` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
   
-  `milestonetype_slug` varchar(255) NOT NULL,
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `milestonetype_slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
+  `alt_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
   
-  `alt_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY `mstnt_unique_mstnt_pair` (`milestonetype_slug`,`nominationtype_id`),
   
-  CONSTRAINT `mstnt_serial` PRIMARY KEY (`id`),
+  UNIQUE KEY `mstnt_serial` (`id`),
+  KEY `mstnt_idx_milestonetype_slug` (`milestonetype_slug`),
+  KEY `mstnt_idx_nominationtype_id` (`nominationtype_id`),
+  
+  CONSTRAINT `mstnt_fk_milestonetype_slug`
+    FOREIGN KEY (`milestonetype_slug`)
+    REFERENCES `milestonetype` (`slug`),
+  
+  CONSTRAINT `mstnt_fk_nominationtype_id`
+    FOREIGN KEY (`nominationtype_id`)
+    REFERENCES `nominationtype` (`id`)
 
-  UNIQUE KEY `mstnt_unique_mstnt_pair` (`milestonetype_slug`,`nominationtype_id`),
-  KEY `mstnt_milestonetype_slug` (`milestonetype_slug`),
-  KEY `mstnt_nominationtype_id` (`nominationtype_id`),
-  CONSTRAINT `mstnt_milestonetype_slug` FOREIGN KEY (`milestonetype_slug`) REFERENCES `milestonetype` (`slug`),
-  CONSTRAINT `mstnt_nominationtype_id` FOREIGN KEY (`nominationtype_id`) REFERENCES `nominationtype` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-DROP TABLE IF EXISTS `milestone`;
-CREATE TABLE `milestone` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
+DELIMITER //
+CREATE TRIGGER `milestonetype_nominationtype_on_insert` BEFORE INSERT ON `milestonetype_nominationtype`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
 
-  `milestonetype_slug` varchar(255) NOT NULL,
+CREATE TRIGGER `milestonetype_nominationtype_on_update` BEFORE UPDATE ON `milestonetype_nominationtype`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+CREATE TABLE `milestone` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `milestonetype_slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
   `awardcycle_id` int(11) unsigned NOT NULL,
-  
   `date` date NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+
+  PRIMARY KEY `milestone_mstype_once_per_nomtype_per_cycle` (`milestonetype_slug`, `nominationtype_id`, `awardcycle_id`),
   
-  `deleted_at` datetime DEFAULT NULL,
+  UNIQUE KEY `milestone_serial` (`id`),  
+  KEY `milestone_idx_nominationtype_id` (`nominationtype_id`),
+  KEY `milestone_idx_milestonetype_id` (`milestonetype_slug`),
+  KEY `milestone_idx_awardcycle_id` (`awardcycle_id`),
 
-  CONSTRAINT `milestone_serial` PRIMARY KEY (`id`),
+  CONSTRAINT `milestone_fk_awardcycle_id`
+    FOREIGN KEY (`awardcycle_id`)
+    REFERENCES `awardcycle` (`id`),
   
-  #Use this as composite primary key.
-  #Any given nomination type can use a milestonetype once in the given award cycle.
-  UNIQUE KEY `milestone_mstype_once_per_nomtype_per_cycle` (
-    `milestonetype_slug`,
-    `nominationtype_id`,
-    `awardcycle_id`
-  ),
-    
-  KEY `milestone_nominationtype` (`nominationtype_id`),
-  KEY `milestone_milestonetype` (`milestonetype_slug`),
-  KEY `milestone_awardcycle` (`awardcycle_id`),
+  CONSTRAINT `milestone_fk_milestonetype_slug`
+    FOREIGN KEY (`milestonetype_slug`)
+    REFERENCES `milestonetype` (`slug`),
+  
+  CONSTRAINT `milestone_fk_nominationtype_id`
+    FOREIGN KEY (`nominationtype_id`)
+    REFERENCES `nominationtype` (`id`),
 
-  CONSTRAINT `milestone_awardcycle_exists` FOREIGN KEY (`awardcycle_id`) REFERENCES `awardcycle` (`id`),
-  CONSTRAINT `milestone_milestonetype_slug` FOREIGN KEY (`milestonetype_slug`) REFERENCES `milestonetype` (`slug`),
-  CONSTRAINT `milestone_nominationtype_exists` FOREIGN KEY (`nominationtype_id`) REFERENCES `nominationtype` (`id`),
-
-  #The milestone type must be valid for the nomination type
   CONSTRAINT `ms_unique_mstnt_pair_exists`
     FOREIGN KEY (
       `milestonetype_slug`,
@@ -594,7 +710,6 @@ CREATE TABLE `milestone` (
       `nominationtype_id`
     ),
 
-  #The nomination type must be valid for the award cycle
   CONSTRAINT `ms_unique_acnt_pair_exists`
     FOREIGN KEY (
       `awardcycle_id`,
@@ -604,15 +719,4 @@ CREATE TABLE `milestone` (
       `nominationtype_id`
     )
 
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-DROP TABLE IF EXISTS `upload`;
-CREATE TABLE `upload` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(191) NOT NULL,
-  `type` enum('application/pdf') NOT NULL,
-  `size` int(11) NOT NULL,
-  `content` mediumblob NOT NULL,
-
-  CONSTRAINT `pdf_serial` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
