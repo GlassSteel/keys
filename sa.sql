@@ -1,3 +1,125 @@
+#added declined reason to awards?
+
+#department
+CREATE TABLE `department` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `abbr` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `department_unique_name` (`name`),
+  UNIQUE KEY `department_unique_abbr` (`abbr`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `department_on_insert` BEFORE INSERT ON `department`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `department_on_update` BEFORE UPDATE ON `department`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+#user
+CREATE TABLE `user` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `onyen` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `unc_pid` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+  `first_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `last_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `department_id` int(10) unsigned DEFAULT NULL,
+  
+  PRIMARY KEY (`id`),
+  
+  UNIQUE KEY `user_unique_email` (`email`),
+  UNIQUE KEY `user_unique_onyen` (`onyen`),
+  UNIQUE KEY `user_unique_unc_pid` (`unc_pid`),
+  KEY `user_idx_department_id` (`department_id`),
+  
+  CONSTRAINT `user_fk_department_id`
+    FOREIGN KEY (`department_id`)
+    REFERENCES `department` (`id`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `user_on_insert` BEFORE INSERT ON `user`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `user_on_update` BEFORE UPDATE ON `user`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+#hispaniclatino
+CREATE TABLE `hispaniclatino` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `option` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `hispaniclatino_unique_option` (`option`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `hispaniclatino_on_insert` BEFORE INSERT ON `hispaniclatino`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `hispaniclatino_on_update` BEFORE UPDATE ON `hispaniclatino`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+#raceselfid
+CREATE TABLE `raceselfid` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `option` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `raceselfid_unique_option` (`option`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `raceselfid_on_insert` BEFORE INSERT ON `raceselfid`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `raceselfid_on_update` BEFORE UPDATE ON `raceselfid`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+
 #awardcycle
 CREATE TABLE `awardcycle` (
  
@@ -179,116 +301,154 @@ DELIMITER ;
 CREATE TRIGGER `awardoffer_on_update` BEFORE UPDATE ON `awardoffer`
     FOR EACH ROW SET NEW.updated_at = NOW();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#nomination
 CREATE TABLE `nomination` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
 
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `nominee_id` int(11) unsigned NOT NULL,
   `awardcycle_id` int(11) unsigned NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
+  `nom_class_table` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `nominator_id` int(11) unsigned NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
+  `active` tinyint DEFAULT 1,
 
-  CONSTRAINT `nomination_serial` PRIMARY KEY (`id`),
-
-  #Use this as composite primary key.
-  #Any given given user can have zero or one nominations for each nomination type paired to the given award cycle.
-  UNIQUE KEY `nomination_one_nom_per_user_per_nomtype_per_cycle` (
-    `nominee_id`,
-    `awardcycle_id`,
-    `nominationtype_id`
-  ),
-
-  KEY `nomination_nominee` (`nominee_id`),
-  KEY `nomination_awardcycle` (`awardcycle_id`),
-  KEY `nomination_nominationtype` (`nominationtype_id`),
+  PRIMARY KEY (`nominee_id`,`awardcycle_id`,`nom_class_table`),
   
-  CONSTRAINT `nomination_awardcycle_exists`
-    FOREIGN KEY (`awardcycle_id`) REFERENCES `awardcycle` (`id`),
-  CONSTRAINT `nomination_nominationtype_exists`
-    FOREIGN KEY (`nominationtype_id`) REFERENCES `nominationtype` (`id`),
-  CONSTRAINT `nomination_nominee_exists`
-    FOREIGN KEY (`nominee_id`) REFERENCES `user` (`id`),
-  CONSTRAINT `nomination_nominator_exists`
-    FOREIGN KEY (`nominator_id`) REFERENCES `user` (`id`),
-  #Nominations can only have a nomination type paired to the given award cycle.
+  UNIQUE KEY `nomination_serial` (`id`),
+  KEY `nomination_idx_nominee_id` (`nominee_id`),
+  KEY `nomination_idx_nominator_id` (`nominator_id`),
+  KEY `nomination_idx_awardcycle_id` (`awardcycle_id`),
+  KEY `nomination_idx_nom_class_table` (`nom_class_table`),
+  KEY `nomination_idx_nominationtype_id` (`nominationtype_id`),
+  
+  CONSTRAINT `nomination_fk_awardcycle_id`
+    FOREIGN KEY (`awardcycle_id`)
+    REFERENCES `awardcycle` (`id`),
+  
+  CONSTRAINT `nomination_fk_nom_class_table`
+    FOREIGN KEY (`nom_class_table`)
+    REFERENCES `nominationtype` (`nom_class_table`),
+  
+  CONSTRAINT `nomination_fk_nominee_id`
+    FOREIGN KEY (`nominee_id`)
+    REFERENCES `user` (`id`),
+  
+  CONSTRAINT `nomination_fk_nominator_id`
+    FOREIGN KEY (`nominator_id`)
+    REFERENCES `user` (`id`),
+
   CONSTRAINT `nomination_unique_acnt_pair_exists`
-    FOREIGN KEY (`awardcycle_id`, `nominationtype_id`) REFERENCES `awardcycle_nominationtype` (`awardcycle_id`, `nominationtype_id`)
+    FOREIGN KEY (`awardcycle_id`, `nominationtype_id`)
+    REFERENCES `awardcycle_nominationtype` (`awardcycle_id`, `nominationtype_id`)
+
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DELIMITER //
+CREATE TRIGGER `nomination_on_insert` BEFORE INSERT ON `nomination`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
 
+CREATE TRIGGER `nomination_on_update` BEFORE UPDATE ON `nomination`
+    FOR EACH ROW SET NEW.updated_at = NOW();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#selfnom
 CREATE TABLE `selfnom` (
+
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  
   `nomination_id` int(11) unsigned NOT NULL,
-
   `department_id` int(11) unsigned NOT NULL,
-  `degree_program` varchar(100) NOT NULL,
-  `undergrad_institution` varchar(255) NOT NULL,
-  `undergrad_gpa` varchar(255) NOT NULL,
-  `graduate_institution` varchar(255) DEFAULT NULL,
-  `hispanic_latino_option_id` int(11) unsigned DEFAULT NULL,
-  #TODO add pivot table for race identity options
+  `degree_program` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `undergrad_institution` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `undergrad_gpa` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `graduate_institution` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `hispaniclatino_id` int(11) unsigned DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint DEFAULT 1,
 
-  CONSTRAINT `selfnom_serial` PRIMARY KEY (`id`),
+   #TODO add pivot table for race identity options
 
-  CONSTRAINT `selfnom_nomination_exists`
-    FOREIGN KEY (`nomination_id`) REFERENCES `nomination` (`id`),
-  #CONSTRAINT `selfnom_department_exists` //TODO restore when deptartment table is added, hispanic_latino also
-    #FOREIGN KEY (`department_id`) REFERENCES `department` (`id`),
+  PRIMARY KEY (`nomination_id`),
+
+  UNIQUE KEY `selfnom_serial` (`id`),
+
+  CONSTRAINT `selfnom_fk_nomination_id`
+    FOREIGN KEY (`nomination_id`)
+    REFERENCES `nomination` (`id`),
+  
+  CONSTRAINT `selfnom_fk_department_id`
+    FOREIGN KEY (`department_id`)
+    REFERENCES `department` (`id`),
+
+  CONSTRAINT `selfnom_fk_hispaniclatino_id`
+    FOREIGN KEY (`hispaniclatino_id`)
+    REFERENCES `hispaniclatino` (`id`)
+
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+#selfnom_raceselfid
+CREATE TABLE `selfnom_raceselfid` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `selfnom_id` int(11) unsigned NOT NULL,
+  `raceselfid_id` int(11) unsigned NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+  
+  PRIMARY KEY (`selfnom_id`,`raceselfid_id`),
+  
+  UNIQUE KEY `snrsi_serial` (`id`),
+  KEY `snrsi_idx_raceselfid_id` (`raceselfid_id`),
+  KEY `snrsi_idx_selfnom_id` (`selfnom_id`),
+  
+  CONSTRAINT `snrsi_fk_selfnom_id`
+    FOREIGN KEY (`selfnom_id`)
+    REFERENCES `selfnom` (`id`),
+  
+  CONSTRAINT `snrsi_fk_raceselfid_id`
+    FOREIGN KEY (`raceselfid_id`)
+    REFERENCES `raceselfid` (`id`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `selfnom_raceselfid_on_insert` BEFORE INSERT ON `selfnom_raceselfid`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `selfnom_raceselfid_on_update` BEFORE UPDATE ON `selfnom_raceselfid`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 CREATE TABLE `nomination_awardoffer` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
