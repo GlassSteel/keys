@@ -1,19 +1,193 @@
 #added declined reason to awards?
 
 TODO:
-email
-emailsendattempt
-deptemailrecipients
-awardprofileemailrecipients
+
+email - DONE
+emailtype i.e. notification,rejection,frr - DONE
+emailrecipienttype i.e. to,cc,bcc - DONE
+emailrecipient - DONE
+emailsendattempt - DONE
+
+includedemailrecipient plus pivots to dept, awardprofile
+various email to object pivots
+
 kochtravelaward
 role
 capability
+role_capability
+user_role
+awardoffer_milestone
+payoutsegment
+payout
+award
+releaseoption
+releaseoption_award
+something to replace award_notification sprinkles
+
+#emailtype
+CREATE TABLE `emailtype` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `emailtype_unique_type` (`type`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `emailtype_on_insert` BEFORE INSERT ON `emailtype`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `emailtype_on_update` BEFORE UPDATE ON `emailtype`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#emailrecipienttype
+CREATE TABLE `emailrecipienttype` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `emailrecipienttype_unique_type` (`type`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `emailrecipienttype_on_insert` BEFORE INSERT ON `emailrecipienttype`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `emailrecipienttype_on_update` BEFORE UPDATE ON `emailrecipienttype`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#email
+CREATE TABLE `email` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `emailtype_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `subject` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `body` mediumtext COLLATE utf8_unicode_ci,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  KEY `email_idx_emailtype_id` (`emailtype_id`),
+  
+  CONSTRAINT `email_fk_emailtype_id`
+    FOREIGN KEY (`emailtype_id`)
+    REFERENCES `emailtype` (`id`),
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `email_on_insert` BEFORE INSERT ON `email`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `email_on_update` BEFORE UPDATE ON `email`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#emailrecipient
+CREATE TABLE `emailrecipient` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `email_id` int(11) unsigned NOT NULL,
+  `emailrecipienttype_id` int(11) unsigned NOT NULL,
+  `user_email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  KEY `emailrecipient_idx_email_id` (`email_id`),
+  KEY `emailrecipient_idx_emailrecipienttype_id` (`emailrecipienttype_id`),
+  KEY `emailrecipient_idx_user_email` (`user_email`),
+  UNIQUE KEY 'emailrecipient_unique_recipient_once_per_email' (`email_id`,`user_email`),
+  
+  CONSTRAINT `emailrecipient_fk_email_id`
+    FOREIGN KEY (`email_id`)
+    REFERENCES `email` (`id`),
+
+  CONSTRAINT `emailrecipient_fk_user_email`
+    FOREIGN KEY (`user_email`)
+    REFERENCES `user` (`email`),
+
+  CONSTRAINT `emailrecipient_fk_emailrecipienttype_id`
+    FOREIGN KEY (`emailrecipienttype_id`)
+    REFERENCES `emailrecipienttype` (`id`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `emailrecipient_on_insert` BEFORE INSERT ON `emailrecipient`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `emailrecipient_on_update` BEFORE UPDATE ON `emailrecipient`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#emailsendattempt
+CREATE TABLE `emailsendattempt` (
+
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `email_id` int(11) unsigned NOT NULL,
+  `succeeded` tinyint(1) DEFAULT '0',
+  `attempted` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
+
+  PRIMARY KEY (`id`),
+
+  KEY `emailsendattempt_idx_email_id` (`email_id`),
+
+  CONSTRAINT `emailsendattempt_fk_email_id`
+    FOREIGN KEY (`email_id`)
+    REFERENCES `email` (`id`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `emailsendattempt_on_insert` BEFORE INSERT ON `emailsendattempt`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `emailsendattempt_on_update` BEFORE UPDATE ON `emailsendattempt`
+    FOR EACH ROW SET NEW.last_modified = NOW();
 
 #upload
 CREATE TABLE `upload` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `file_name` varchar(255) NOT NULL,
-  `file_type` varchar(255) NOT NULL,
+  `file_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `file_type` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `file_size` int(11) NOT NULL,
   `file_content` mediumblob NOT NULL,
   `created` datetime DEFAULT NULL,
@@ -435,12 +609,14 @@ CREATE TABLE `selfnom` (
   `cv` int(11) unsigned DEFAULT NULL,
   
   `frr_requestee_id` int(11) unsigned DEFAULT NULL,
+  `frr_email_id` int(11) unsigned DEFAULT NULL,
   `frr_email_sent` tinyint(1) DEFAULT 0,
   `frracceptdecline` int(11) unsigned DEFAULT NULL,
   `frr_recommendation_text` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `frr_text_created` datetime DEFAULT NULL,
   `frr_text_last_modified` datetime DEFAULT NULL,
 
+  `reject_email_id` int(11) unsigned DEFAULT NULL,
   `reject_email_sent` tinyint(1) DEFAULT 0,
 
   `created` datetime DEFAULT NULL,
@@ -454,6 +630,14 @@ CREATE TABLE `selfnom` (
   CONSTRAINT `selfnom_fk_nomination_id`
     FOREIGN KEY (`nomination_id`)
     REFERENCES `nomination` (`id`),
+
+  CONSTRAINT `selfnom_fk_frr_email_id`
+    FOREIGN KEY (`frr_email_id`)
+    REFERENCES `email` (`id`),
+
+  CONSTRAINT `selfnom_fk_reject_email_id`
+    FOREIGN KEY (`reject_email_id`)
+    REFERENCES `email` (`id`),
   
   CONSTRAINT `selfnom_fk_department_id`
     FOREIGN KEY (`department_id`)
