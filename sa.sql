@@ -1,52 +1,216 @@
-CREATE TABLE `awardcycle_nominationtype` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
+#awardcycle
+CREATE TABLE `awardcycle` (
+ 
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `description` text COLLATE utf8_unicode_ci,
+  `begin_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
   
+  PRIMARY KEY (`id`),
+  
+  UNIQUE KEY `awardcycle_unique_name` (`name`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `awardcycle_on_insert` BEFORE INSERT ON `awardcycle`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `awardcycle_on_update` BEFORE UPDATE ON `awardcycle`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+#nominationtype
+CREATE TABLE `nominationtype` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `nom_class_table` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `item_label` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `item_label_plural` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `max_offers_per_nomination` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint DEFAULT 1,
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nomtype_unique_name` (`name`),
+  UNIQUE KEY `nomtype_unique_nom_class_table` (`nom_class_table`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `nominationtype_on_insert` BEFORE INSERT ON `nominationtype`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `nominationtype_on_update` BEFORE UPDATE ON `nominationtype`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+#awardcycle_nominationtype
+CREATE TABLE `awardcycle_nominationtype` (
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `awardcycle_id` int(11) unsigned NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '1',
   
-  CONSTRAINT `acnt_serial` PRIMARY KEY (`id`),
+  PRIMARY KEY (`awardcycle_id`,`nominationtype_id`),
+  
+  UNIQUE KEY `acnt_serial` (`id`),
+  KEY `acnt_idx_nominationtype_id` (`nominationtype_id`),
+  KEY `acnt_idx_awardcycle_id` (`awardcycle_id`),
+  
+  CONSTRAINT `acnt_fk_awardcycle_id`
+    FOREIGN KEY (`awardcycle_id`)
+    REFERENCES `awardcycle` (`id`),
+  
+  CONSTRAINT `acnt_fk_nominationtype_id`
+    FOREIGN KEY (`nominationtype_id`)
+    REFERENCES `nominationtype` (`id`)
 
-  #Use this as composite primary key. Any given award cycle can be paired with a nomination type zero or one times.
-  UNIQUE KEY `acnt_unique_acnt_pair` (`awardcycle_id`,`nominationtype_id`), 
-  
-  KEY `acnt_nominationtype_id` (`nominationtype_id`),
-  KEY `acnt_awardcycle_id` (`awardcycle_id`),
-  
-  CONSTRAINT `acnt_awardcycle_exists`
-    FOREIGN KEY (`awardcycle_id`) REFERENCES `awardcycle` (`id`),
-  CONSTRAINT `acnt_nominationtype_exists`
-    FOREIGN KEY (`nominationtype_id`) REFERENCES `nominationtype` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DELIMITER //
+CREATE TRIGGER `awardcycle_nominationtype_on_insert` BEFORE INSERT ON `awardcycle_nominationtype`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `awardcycle_nominationtype_on_update` BEFORE UPDATE ON `awardcycle_nominationtype`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+#awardprofile
+CREATE TABLE `awardprofile` (
+
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `formal_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8_unicode_ci NOT NULL,
+  `criteria_requirements` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `designation_number` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `about_donors` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `about_scholarship` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `thankyou_addressee` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `donor_contact_info` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `osa_criteria` text COLLATE utf8_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint DEFAULT 1,
+
+  PRIMARY KEY (`id`),
+
+  UNIQUE KEY `awardprofile_unique_name` (`name`),
+  UNIQUE KEY `awardprofile_unique_formal_name` (`formal_name`),
+  UNIQUE KEY `awardprofile_unique_designation_number` (`designation_number`)
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `awardprofile_on_insert` BEFORE INSERT ON `awardprofile`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `awardprofile_on_update` BEFORE UPDATE ON `awardprofile`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+#awardoffer
 CREATE TABLE `awardoffer` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
-
+  
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `awardcycle_id` int(11) unsigned NOT NULL,
   `nominationtype_id` int(11) unsigned NOT NULL,
   `awardprofile_id` int(11) unsigned NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `active` tinyint DEFAULT 1,
   
-  CONSTRAINT `awardoffer_serial` PRIMARY KEY (`id`),
-
-  #Use this as composite primary key. Any given award profile can be offered during an award cycle zero or one times.
-  UNIQUE KEY `awardoffer_offer_profile_once_per_cycle` (`awardcycle_id`,`awardprofile_id`),
+  PRIMARY KEY (`awardcycle_id`,`awardprofile_id`),
   
-  KEY `awardoffer_awardcycle_id` (`awardcycle_id`),
-  KEY `awardoffer_nominationtype_id` (`nominationtype_id`),
-  KEY `awardoffer_awardprofile_id` (`awardprofile_id`),
-
-  KEY `ao_for_nao_awardoffer_exists_and_same_nomtype_and_cycle` (`awardcycle_id`,`nominationtype_id`,`awardprofile_id`),
+  UNIQUE KEY `awardoffer_serial` (`id`),
+  KEY `awardoffer_idx_awardcycle_id` (`awardcycle_id`),
+  KEY `awardoffer_idx_nominationtype_id` (`nominationtype_id`),
+  KEY `awardoffer_idx_awardprofile_id` (`awardprofile_id`),
+  KEY `ao_for_nao_ao_exists_and_same_nomtype_and_ac` (`awardcycle_id`,`nominationtype_id`,`awardprofile_id`),
   
-  CONSTRAINT `awardoffer_awardcycle_exists` 
-    FOREIGN KEY (`awardcycle_id`) REFERENCES `awardcycle` (`id`),
-  CONSTRAINT `awardoffer_awardprofile_exists` 
-    FOREIGN KEY (`awardprofile_id`) REFERENCES `awardprofile` (`id`),
-  CONSTRAINT `awardoffer_nominationtype_exists` 
-    FOREIGN KEY (`nominationtype_id`) REFERENCES `nominationtype` (`id`),
-
-  #Award profiles can only be offered via a nomination type paired to the given award cycle.
+  CONSTRAINT `awardoffer_fk_awardcycle_id`
+    FOREIGN KEY (`awardcycle_id`)
+    REFERENCES `awardcycle` (`id`),
+  
+  CONSTRAINT `awardoffer_fk_awardprofile_id`
+    FOREIGN KEY (`awardprofile_id`)
+    REFERENCES `awardprofile` (`id`),
+  
+  CONSTRAINT `awardoffer_fk_nominationtype_id`
+    FOREIGN KEY (`nominationtype_id`)
+    REFERENCES `nominationtype` (`id`),
+  
   CONSTRAINT `awardoffer_unique_acnt_pair_exists`
-    FOREIGN KEY (`awardcycle_id`, `nominationtype_id`) REFERENCES `awardcycle_nominationtype` (`awardcycle_id`, `nominationtype_id`)
+    FOREIGN KEY (`awardcycle_id`, `nominationtype_id`)
+    REFERENCES `awardcycle_nominationtype` (`awardcycle_id`, `nominationtype_id`)
+
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `awardoffer_on_insert` BEFORE INSERT ON `awardoffer`
+    FOR EACH ROW BEGIN
+      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
+      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `awardoffer_on_update` BEFORE UPDATE ON `awardoffer`
+    FOR EACH ROW SET NEW.updated_at = NOW();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 CREATE TABLE `nomination` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT, #Redundant, for RedBean use
@@ -85,6 +249,25 @@ CREATE TABLE `nomination` (
   CONSTRAINT `nomination_unique_acnt_pair_exists`
     FOREIGN KEY (`awardcycle_id`, `nominationtype_id`) REFERENCES `awardcycle_nominationtype` (`awardcycle_id`, `nominationtype_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 CREATE TABLE `selfnom` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -176,33 +359,7 @@ CREATE TABLE `nomination_awardoffer` (
     )
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `nominationtype` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  
-  `name` varchar(255) NOT NULL,
-  `item_label` varchar(255) NOT NULL, #i.e., Nomination, Application, Selection
-  `item_label_plural` varchar(255) DEFAULT NULL, #i.e., Nominations, Applications, Selections
-  `max_offers_per_nomination` int(11) DEFAULT NULL
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
 
-  CONSTRAINT `nomtype_serial` PRIMARY KEY (`id`),
-
-  UNIQUE KEY `nomtype_unique_name` (`name`),
-
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-DELIMITER //#todo not working?
-CREATE TRIGGER `nominationtype_on_insert` BEFORE INSERT ON `nominationtype`
-    FOR EACH ROW BEGIN
-      SET NEW.created_at = IFNULL(NEW.created_at, NOW());
-      SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
-    END//
-DELIMITER ;
-
-CREATE TRIGGER `nominationtype_on_update` BEFORE UPDATE ON `nominationtype`
-    FOR EACH ROW SET NEW.updated_at = IFNULL(NEW.updated_at, NOW());
 
 DROP TABLE IF EXISTS `milestonetype`;
 CREATE TABLE `milestonetype` (
