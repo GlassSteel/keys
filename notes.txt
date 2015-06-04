@@ -8,26 +8,27 @@ emailrecipienttype i.e. to,cc,bcc - OK
 emailrecipient - OK
 emailsendattempt - OK
 
-department_user pivot?
+department_user pivot? - eventually, for better role scoping
 
 includedemailrecipient plus pivots to dept, awardprofile
+
 various email to object pivots?
 
-kochtravelaward
+kochtravelaward - TODO
 
 role - OK
 capability - OK
 role_capability - OK
 user_role - OK
 
-milestone_awardcycle - NEEDS RUN
-milestone_awardoffer - NEEDS RUN
+milestone_awardcycle - OK
+milestone_awardoffer - OK
 
-payoutsegment
-payout
-award
-releaseoption
-releaseoption_award
+payoutsegment - TODO
+payout - TODO
+award - TODO
+releaseoption - TODO
+releaseoption_award - TODO
 
 something to replace award_notification sprinkles
 

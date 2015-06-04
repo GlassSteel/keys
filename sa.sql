@@ -1151,4 +1151,91 @@ DELIMITER ;
 CREATE TRIGGER `user_role_on_update` BEFORE UPDATE ON `user_role`
     FOR EACH ROW SET NEW.last_modified = NOW();
 
+#payoutsegment
+CREATE TABLE `payoutsegment` (
+
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `awardoffer_id` int(11) unsigned NOT NULL,
+  `department_abbr` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `amount` decimal(11,2) NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+
+  PRIMARY KEY (`id`),
+
+  KEY `payoutsegment_idx_awardoffer_id` (`awardoffer_id`),
+  UNIQUE KEY `payoutsegment_unique_ao_once_per_dept` (`awardoffer_id`,`department_abbr`),
+
+  CONSTRAINT `payoutsegment_fk_awardoffer_id`
+    FOREIGN KEY (`awardoffer_id`)
+    REFERENCES `awardoffer` (`id`) ,
+
+  CONSTRAINT `payoutsegment_fk_department_abbr`
+    FOREIGN KEY (`department_abbr`)
+    REFERENCES `department` (`abbr`)  
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `payoutsegment_on_insert` BEFORE INSERT ON `payoutsegment`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `payoutsegment_on_update` BEFORE UPDATE ON `payoutsegment`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#awardnotification
+CREATE TABLE `awardnotification` (
+
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `email_id` int(11) unsigned DEFAULT NULL,
+  `accept_decline_deadline` date DEFAULT NULL,
+  #TODO email tracking fields as per selfnom
+  #TODO add auth_respondant, comp. key to award
+  `created` datetime DEFAULT NULL,
+  `last_modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1,
+
+  PRIMARY KEY (`id`),
+
+  KEY `awardnotification_idx_email_id` (`email_id`),
+
+  CONSTRAINT `awardnotification_fk_email_id`
+    FOREIGN KEY (`email_id`)
+    REFERENCES `email` (`id`)    
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER //
+CREATE TRIGGER `awardnotification_on_insert` BEFORE INSERT ON `awardnotification`
+    FOR EACH ROW BEGIN
+      SET NEW.created = IFNULL(NEW.created, NOW());
+      SET NEW.last_modified = IFNULL(NEW.last_modified, NOW());
+    END//
+DELIMITER ;
+
+CREATE TRIGGER `awardnotification_on_update` BEFORE UPDATE ON `awardnotification`
+    FOR EACH ROW SET NEW.last_modified = NOW();
+
+#award
+CREATE TABLE `award` (
+
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `nominee_id`
+  `awardcycle_id`
+  `awardprofile_id`
+  `amout`
+  `accept_decline_status`
+  `info_release_status`
+  `thankyou_text`
+
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+#award_awardnotification
+
 SHOW ENGINE INNODB STATUS;
